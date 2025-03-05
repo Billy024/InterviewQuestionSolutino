@@ -14,6 +14,7 @@ mongoose.connect("mongodb://localhost:27017/interviewApp", {
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(express.static(__dirname + "/public"));
 app.use(
   session({

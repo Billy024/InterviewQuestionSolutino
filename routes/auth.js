@@ -38,12 +38,12 @@ router.post("/signup", async (req, res) => {
         throw error;
       }
       req.session.totalUserLength = user_length;
-      res.redirect("/");
+      res.status(200).send({ message: "Sign up successful" });
     });
   } catch (error) {
     console.log("error", error.status);
     console.log("error", error.message);
-    res.status(error.status || 500).send(error.message);
+    res.status(error.status || 500).json({ message: error.message });
   }
 });
 
@@ -54,37 +54,31 @@ router.post("/login", async (req, res) => {
   try {
     const user_length = await User.countDocuments();
     if (!user_length) {
-      let error = new Error("No users found");
+      const error = new Error("No users found");
       error.status = 404;
       throw error;
     }
+
     const user = await User.findOne({ username });
     if (!user) {
-      let error = new Error("Invalid username");
+      const error = new Error("Invalid username");
       error.status = 401;
       throw error;
     }
-    if (user) {
-      bcrypt.compare(password, user.password, (err, result) => {
-        if (err) {
-          let error = new Error("Error comparing passwords:", err);
-          error.status = 500;
-          throw error;
-        } else {
-          if (result) {
-            req.session.user = user;
-            req.session.totalUserLength = user_length;
-            res.redirect("/");
-          } else {
-            let error = new Error("Invalid password");
-            error.status = 401;
-            throw error;
-          }
-        }
-      });
+
+    const result = await bcrypt.compare(password, user.password);
+    if (!result) {
+      const error = new Error("Invalid password");
+      error.status = 401;
+      throw error;
     }
+
+    req.session.user = user;
+    req.session.totalUserLength = user_length;
+    res.status(200).send({ message: "Login successful" });
   } catch (error) {
-    res.status(error.status || 500).send(error.message);
+    console.log("error caught", error);
+    res.status(error.status || 500).json({ message: error.message });
   }
 });
 
