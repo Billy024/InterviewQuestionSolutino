@@ -11,3 +11,11 @@ Your task is to modify the project and create an identifier, which should be a u
 This field will act as an additional identifier for each document inserted into the collection.
 Please feel free to change the project to implement the feature.
 5. (Optional) Try to modify the design for the signup, login form so that it may look nicer. No need to be very nice.
+
+GETTING STARTED
+1) Run following command to install all the necessary modules:  
+```npm install```
+
+2) run the following command to start up your server with nodemon  
+```npm install -g nodemon```
+```nodemon app```  
