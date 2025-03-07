@@ -1,7 +1,9 @@
+require("dotenv").config();
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const saltRounds = 10;
 
 // Sign up route
@@ -38,11 +40,16 @@ router.post("/signup", async (req, res) => {
         throw error;
       }
       req.session.totalUserLength = user_length;
+      const token = jwt.sign(
+        { email: email, username: username },
+        process.env.SOLUTINO_AUTH_KEY,
+        { expiresIn: "1h" }
+      );
+
+      req.session.token = token;
       res.status(200).send({ message: "Sign up successful" });
     });
   } catch (error) {
-    console.log("error", error.status);
-    console.log("error", error.message);
     res.status(error.status || 500).json({ message: error.message });
   }
 });
@@ -73,6 +80,13 @@ router.post("/login", async (req, res) => {
       throw error;
     }
 
+    const token = jwt.sign(
+      { userId: user._id, username: user.username },
+      process.env.SOLUTINO_AUTH_KEY,
+      { expiresIn: "1h" }
+    );
+
+    req.session.token = token;
     req.session.user = user;
     req.session.totalUserLength = user_length;
     res.status(200).send({ message: "Login successful" });

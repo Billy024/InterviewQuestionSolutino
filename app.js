@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const authRoutes = require("./routes/auth");
+const authenticateToken = require("./middleware/authware");
 
 const app = express();
 
@@ -18,20 +19,17 @@ app.use(express.json());
 app.use(express.static(__dirname + "/public"));
 app.use(
   session({
-    secret: "secret_key",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
+    cookie: { secure: false },
   })
 );
-app.use((req, res, next) => {
-  console.log("Session Data in middleware:", req.session);
-  next();
-});
 
 app.set("view engine", "ejs");
 
 // Routes
-app.get("/", (req, res) => {
+app.get("/", authenticateToken, (req, res) => {
   if (req.session.user && req.session.totalUserLength) {
     res.send(
       `Welcome. Your name is : ${req.session.user.username}. ${req.session.totalUserLength} users have signed up so far!`
